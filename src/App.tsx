@@ -7,75 +7,108 @@ import { Input } from './components/ui/input'
 import { Button } from './components/ui/button'
 import { useState } from 'react'
 
-const anexos = {
+interface Faixa {
+  limite: number
+  aliquota: number
+  deduzir: number
+}
+
+// Tipagem dos anexos
+type Anexos = Record<string, Faixa[]>
+
+const anexos: Anexos = {
   "Anexo I (Comércio)": [
-    { limite: 180000.00, aliquota: 0.040, deduzir: 0.00 },
-    { limite: 360000.00, aliquota: 0.073, deduzir: 5940.00 },
-    { limite: 720000.00, aliquota: 0.095, deduzir: 13860.00 },
-    { limite: 1800000.00, aliquota: 0.107, deduzir: 22500.00 },
-    { limite: 3600000.00, aliquota: 0.143, deduzir: 87300.00 },
-    { limite: 4800000.00, aliquota: 0.190, deduzir: 378000.00 }
+    { limite: 180000.0, aliquota: 0.04, deduzir: 0.0 },
+    { limite: 360000.0, aliquota: 0.073, deduzir: 5940.0 },
+    { limite: 720000.0, aliquota: 0.095, deduzir: 13860.0 },
+    { limite: 1800000.0, aliquota: 0.107, deduzir: 22500.0 },
+    { limite: 3600000.0, aliquota: 0.143, deduzir: 87300.0 },
+    { limite: 4800000.0, aliquota: 0.19, deduzir: 378000.0 },
   ],
   "Anexo II (Indústria e Equiparados)": [
-    { limite: 180000.00, aliquota: 0.045, deduzir: 0.00 },
-    { limite: 360000.00, aliquota: 0.078, deduzir: 5940.00 },
-    { limite: 720000.00, aliquota: 0.100, deduzir: 13860.00 },
-    { limite: 1800000.00, aliquota: 0.112, deduzir: 22500.00 },
-    { limite: 3600000.00, aliquota: 0.147, deduzir: 85500.00 },
-    { limite: 4800000.00, aliquota: 0.300, deduzir: 720000.00 }
+    { limite: 180000.0, aliquota: 0.045, deduzir: 0.0 },
+    { limite: 360000.0, aliquota: 0.078, deduzir: 5940.0 },
+    { limite: 720000.0, aliquota: 0.1, deduzir: 13860.0 },
+    { limite: 1800000.0, aliquota: 0.112, deduzir: 22500.0 },
+    { limite: 3600000.0, aliquota: 0.147, deduzir: 85500.0 },
+    { limite: 4800000.0, aliquota: 0.3, deduzir: 720000.0 },
   ],
   "Anexo III (Serviços - Locação de Bens Móveis)": [
-    { limite: 180000.00, aliquota: 0.060, deduzir: 0.00 },
-    { limite: 360000.00, aliquota: 0.112, deduzir: 9360.00 },
-    { limite: 720000.00, aliquota: 0.135, deduzir: 17640.00 },
-    { limite: 1800000.00, aliquota: 0.160, deduzir: 35640.00 },
-    { limite: 3600000.00, aliquota: 0.210, deduzir: 125640.00 },
-    { limite: 4800000.00, aliquota: 0.330, deduzir: 648000.00 }
+    { limite: 180000.0, aliquota: 0.06, deduzir: 0.0 },
+    { limite: 360000.0, aliquota: 0.112, deduzir: 9360.0 },
+    { limite: 720000.0, aliquota: 0.135, deduzir: 17640.0 },
+    { limite: 1800000.0, aliquota: 0.16, deduzir: 35640.0 },
+    { limite: 3600000.0, aliquota: 0.21, deduzir: 125640.0 },
+    { limite: 4800000.0, aliquota: 0.33, deduzir: 648000.0 },
   ],
   "Anexo IV (Serviços - Limpeza, Vigilância)": [
-    { limite: 180000.00, aliquota: 0.045, deduzir: 0.00 },
-    { limite: 360000.00, aliquota: 0.090, deduzir: 8100.00 },
-    { limite: 720000.00, aliquota: 0.102, deduzir: 12420.00 },
-    { limite: 1800000.00, aliquota: 0.140, deduzir: 39780.00 },
-    { limite: 3600000.00, aliquota: 0.220, deduzir: 183780.00 },
-    { limite: 4800000.00, aliquota: 0.330, deduzir: 828000.00 }
+    { limite: 180000.0, aliquota: 0.045, deduzir: 0.0 },
+    { limite: 360000.0, aliquota: 0.09, deduzir: 8100.0 },
+    { limite: 720000.0, aliquota: 0.102, deduzir: 12420.0 },
+    { limite: 1800000.0, aliquota: 0.14, deduzir: 39780.0 },
+    { limite: 3600000.0, aliquota: 0.22, deduzir: 183780.0 },
+    { limite: 4800000.0, aliquota: 0.33, deduzir: 828000.0 },
   ],
   "Anexo V (Serviços Profissionais)": [
-    { limite: 180000.00, aliquota: 0.155, deduzir: 0.00 },
-    { limite: 360000.00, aliquota: 0.180, deduzir: 4500.00 },
-    { limite: 720000.00, aliquota: 0.195, deduzir: 9900.00 },
-    { limite: 1800000.00, aliquota: 0.205, deduzir: 17100.00 },
-    { limite: 3600000.00, aliquota: 0.230, deduzir: 62100.00 },
-    { limite: 4800000.00, aliquota: 0.305, deduzir: 540000.00 }
-  ]
+    { limite: 180000.0, aliquota: 0.155, deduzir: 0.0 },
+    { limite: 360000.0, aliquota: 0.18, deduzir: 4500.0 },
+    { limite: 720000.0, aliquota: 0.195, deduzir: 9900.0 },
+    { limite: 1800000.0, aliquota: 0.205, deduzir: 17100.0 },
+    { limite: 3600000.0, aliquota: 0.23, deduzir: 62100.0 },
+    { limite: 4800000.0, aliquota: 0.305, deduzir: 540000.0 },
+  ],
+}
+
+// Tipagem dos cálculos realizados
+interface CalculoOk {
+  anexo: string
+  faixaDescricao: string
+  aliquotaNominal: number
+  parcelaADeduzir: number
+  aliquotaEfetiva: number
+  impostoDevido: number
+  erro?: never
+}
+
+interface CalculoErro {
+  anexo: string
+  erro: string
+}
+
+type Calculo = CalculoOk | CalculoErro
+
+// Tipagem do estado de resultados
+interface Resultados {
+  faturamento: number
+  receita12: number
+  calculos: Calculo[]
 }
 
 export function App() {
-  const [faturamentoMes, setFaturamentoMes] = useState('')
-  const [rbt12, setRbt12] = useState('')
-  const [resultados, setResultados] = useState(null)
-  const [erro, setErro] = useState('')
+  const [faturamentoMes, setFaturamentoMes] = useState<string>('')
+  const [rbt12, setRbt12] = useState<string>('')
+  const [resultados, setResultados] = useState<Resultados | null>(null)
+  const [erro, setErro] = useState<string>('')
 
-  const formatarValor = (valor) => {
+  const formatarValor = (valor: number): string => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
-      currency: 'BRL'
+      currency: 'BRL',
     }).format(valor)
   }
 
-  const formatarPercentual = (valor) => {
+  const formatarPercentual = (valor: number): string => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'percent',
       minimumFractionDigits: 4,
-      maximumFractionDigits: 4
+      maximumFractionDigits: 4,
     }).format(valor)
   }
 
-  const calcularSimples = () => {
+  const calcularSimples = (): void => {
     setErro('')
     setResultados(null)
 
-    // Validação de entrada
     const faturamento = parseFloat(faturamentoMes.replace(',', '.'))
     const receita12 = parseFloat(rbt12.replace(',', '.'))
 
@@ -84,42 +117,40 @@ export function App() {
       return
     }
 
-    if (receita12 > 4800000.00) {
-      setErro('RBT12 excede o limite do Simples Nacional (R$ 4.800.000,00). A empresa deve migrar para outro regime tributário.')
+    if (receita12 > 4800000.0) {
+      setErro(
+        'RBT12 excede o limite do Simples Nacional (R$ 4.800.000,00). A empresa deve migrar para outro regime tributário.'
+      )
       return
     }
 
-    // Calcular para todos os anexos
-    const resultadosCalculados : any[] = []
+    const resultadosCalculados: Calculo[] = []
 
     Object.entries(anexos).forEach(([nomeAnexo, tabelaAnexo]) => {
       let encontrouFaixa = false
 
       for (let i = 0; i < tabelaAnexo.length; i++) {
         const faixa = tabelaAnexo[i]
-        
+
         if (receita12 <= faixa.limite) {
-          // Definir descrição da faixa
-          let faixaDescricao
+          let faixaDescricao: string
           if (i === 0) {
             faixaDescricao = `até ${formatarValor(faixa.limite)}`
           } else {
-            const faixaAnterior = tabelaAnexo[i-1].limite
+            const faixaAnterior = tabelaAnexo[i - 1].limite
             faixaDescricao = `de ${formatarValor(faixaAnterior + 0.01)} até ${formatarValor(faixa.limite)}`
           }
 
-          // Cálculo da alíquota efetiva e imposto devido
           const aliquotaNominal = faixa.aliquota
           const parcelaADeduzir = faixa.deduzir
 
-          let aliquotaEfetiva
+          let aliquotaEfetiva: number
           if (receita12 > 0) {
             aliquotaEfetiva = ((receita12 * aliquotaNominal) - parcelaADeduzir) / receita12
           } else {
             aliquotaEfetiva = aliquotaNominal
           }
 
-          // Garantir que a alíquota efetiva não seja negativa
           aliquotaEfetiva = Math.max(0, aliquotaEfetiva)
 
           const impostoDevido = faturamento * aliquotaEfetiva
@@ -130,7 +161,7 @@ export function App() {
             aliquotaNominal,
             parcelaADeduzir,
             aliquotaEfetiva,
-            impostoDevido
+            impostoDevido,
           })
 
           encontrouFaixa = true
@@ -141,7 +172,7 @@ export function App() {
       if (!encontrouFaixa) {
         resultadosCalculados.push({
           anexo: nomeAnexo,
-          erro: 'RBT12 excede todas as faixas deste anexo'
+          erro: 'RBT12 excede todas as faixas deste anexo',
         })
       }
     })
@@ -149,12 +180,12 @@ export function App() {
     setResultados({
       faturamento,
       receita12,
-      calculos: resultadosCalculados
+      calculos: resultadosCalculados,
     })
   }
 
   return (
-      <div className="w-screen min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+    <div className="w-screen min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
@@ -165,7 +196,7 @@ export function App() {
             </h1>
           </div>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Simule o cálculo do DAS para todos os anexos do Simples Nacional. 
+            Simule o cálculo do DAS para todos os anexos do Simples Nacional.
             Esta ferramenta é para fins de estudo e não substitui um software contábil oficial.
           </p>
         </div>
@@ -206,9 +237,9 @@ export function App() {
                 />
               </div>
             </div>
-            
-            <Button 
-              onClick={calcularSimples} 
+
+            <Button
+              onClick={calcularSimples}
               className="w-full md:w-auto text-lg px-8 py-3"
               size="lg"
             >
@@ -253,13 +284,13 @@ export function App() {
 
             {/* Resultados por anexo */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {resultados.calculos.map((calculo, index) => (
+              {resultados.calculos.map((calculo: CalculoOk | CalculoErro, index: number) => (
                 <Card key={index} className="h-fit">
                   <CardHeader>
                     <CardTitle className="text-lg">{calculo.anexo}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {calculo.erro ? (
+                    {"erro" in calculo ? (
                       <Alert>
                         <AlertTriangle className="h-4 w-4" />
                         <AlertDescription>{calculo.erro}</AlertDescription>
@@ -270,7 +301,7 @@ export function App() {
                           <p className="text-sm text-gray-600">Faixa de Enquadramento (RBT12)</p>
                           <p className="font-medium">{calculo.faixaDescricao}</p>
                         </div>
-                        
+
                         <div className="grid grid-cols-2 gap-4 text-sm">
                           <div>
                             <p className="text-gray-600">Alíquota Nominal</p>
@@ -297,7 +328,7 @@ export function App() {
                         </div>
 
                         {/* Observações especiais */}
-                        {calculo.anexo.includes('Anexo IV') && (
+                        {calculo.anexo.includes("Anexo IV") && (
                           <Alert>
                             <Info className="h-4 w-4" />
                             <AlertDescription>
@@ -305,12 +336,12 @@ export function App() {
                             </AlertDescription>
                           </Alert>
                         )}
-                        
-                        {calculo.anexo.includes('Anexo V') && (
+
+                        {calculo.anexo.includes("Anexo V") && (
                           <Alert>
                             <Info className="h-4 w-4" />
                             <AlertDescription>
-                              Para serviços profissionais sem folha de pagamento. 
+                              Para serviços profissionais sem folha de pagamento.
                               Com folha de pagamento, o cálculo pode ser diferente.
                             </AlertDescription>
                           </Alert>
@@ -322,13 +353,14 @@ export function App() {
               ))}
             </div>
 
+
             {/* Avisos importantes */}
             <Alert>
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>
-                <strong>IMPORTANTE:</strong> Este cálculo é uma simulação para fins educativos. 
-                Consulte sempre um contador qualificado e utilize software contábil certificado 
-                para cálculos oficiais. Verifique se sua atividade se enquadra no anexo correto 
+                <strong>IMPORTANTE:</strong> Este cálculo é uma simulação para fins educativos.
+                Consulte sempre um contador qualificado e utilize software contábil certificado
+                para cálculos oficiais. Verifique se sua atividade se enquadra no anexo correto
                 e fique atento às atualizações da legislação.
               </AlertDescription>
             </Alert>
@@ -339,4 +371,4 @@ export function App() {
   )
 }
 
-export default App
+
