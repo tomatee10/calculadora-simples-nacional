@@ -1,15 +1,22 @@
-import { useState } from 'react'
-import { Button } from '@/components/ui/button.jsx'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.jsx'
-import { Input } from '@/components/ui/input.jsx'
-import { Label } from '@/components/ui/label.jsx'
-import { Alert, AlertDescription } from '@/components/ui/alert.jsx'
-import { Checkbox } from '@/components/ui/checkbox.jsx'
-import { Calculator, DollarSign, AlertTriangle, Info, Users, TrendingUp } from 'lucide-react'
-import './App.css'
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Calculator, DollarSign, AlertTriangle, Info, Users, TrendingUp } from 'lucide-react';
+import './App.css';
+
+// Definindo um tipo para as faixas dos anexos para melhor manutenibilidade
+type FaixaAnexo = {
+  limite: number;
+  aliquota: number;
+  deduzir: number;
+};
 
 // Tabelas do Simples Nacional 2024/2025
-const anexos = {
+const anexos: Record<string, FaixaAnexo[]> = {
   "Anexo I (Comércio)": [
     { limite: 180000.00, aliquota: 0.040, deduzir: 0.00 },
     { limite: 360000.00, aliquota: 0.073, deduzir: 5940.00 },
@@ -50,65 +57,62 @@ const anexos = {
     { limite: 3600000.00, aliquota: 0.230, deduzir: 62100.00 },
     { limite: 4800000.00, aliquota: 0.305, deduzir: 540000.00 }
   ]
-}
+};
 
 function App() {
-  const [faturamentoMes, setFaturamentoMes] = useState('')
-  const [rbt12, setRbt12] = useState('')
-  const [folhaPagamento12, setFolhaPagamento12] = useState('')
-  const [aplicarFatorR, setAplicarFatorR] = useState(false)
-  const [resultados, setResultados] = useState(null)
-  const [erro, setErro] = useState('')
+  const [faturamentoMes, setFaturamentoMes] = useState('');
+  const [rbt12, setRbt12] = useState('');
+  const [folhaPagamento12, setFolhaPagamento12] = useState('');
+  const [aplicarFatorR, setAplicarFatorR] = useState(false);
+  const [resultados, setResultados] = useState<any>(null); // Você pode criar um tipo mais específico para os resultados
+  const [erro, setErro] = useState('');
 
-  const formatarValor = (valor) => {
+  const formatarValor = (valor: number): string => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL'
-    }).format(valor)
-  }
+    }).format(valor);
+  };
 
-  const formatarPercentual = (valor) => {
+  const formatarPercentual = (valor: number): string => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'percent',
       minimumFractionDigits: 4,
       maximumFractionDigits: 4
-    }).format(valor)
-  }
+    }).format(valor);
+  };
 
-  const calcularFatorR = (folha12, receita12) => {
-    if (folha12 <= 0 || receita12 <= 0) return 0
-    return folha12 / receita12
-  }
+  const calcularFatorR = (folha12: number, receita12: number): number => {
+    if (folha12 <= 0 || receita12 <= 0) return 0;
+    return folha12 / receita12;
+  };
 
-  const calcularAnexo = (nomeAnexo, tabelaAnexo, faturamento, receita12) => {
+  const calcularAnexo = (nomeAnexo: string, tabelaAnexo: FaixaAnexo[], faturamento: number, receita12: number) => {
     for (let i = 0; i < tabelaAnexo.length; i++) {
-      const faixa = tabelaAnexo[i]
+      const faixa = tabelaAnexo[i];
       
       if (receita12 <= faixa.limite) {
-        // Definir descrição da faixa
-        let faixaDescricao
+        let faixaDescricao;
         if (i === 0) {
-          faixaDescricao = `até ${formatarValor(faixa.limite)}`
+          faixaDescricao = `até ${formatarValor(faixa.limite)}`;
         } else {
-          const faixaAnterior = tabelaAnexo[i-1].limite
-          faixaDescricao = `de ${formatarValor(faixaAnterior + 0.01)} até ${formatarValor(faixa.limite)}`
+          const faixaAnterior = tabelaAnexo[i-1].limite;
+          faixaDescricao = `de ${formatarValor(faixaAnterior + 0.01)} até ${formatarValor(faixa.limite)}`;
         }
 
-        // Cálculo da alíquota efetiva e imposto devido
-        const aliquotaNominal = faixa.aliquota
-        const parcelaADeduzir = faixa.deduzir
+        const aliquotaNominal = faixa.aliquota;
+        const parcelaADeduzir = faixa.deduzir;
 
-        let aliquotaEfetiva
+        let aliquotaEfetiva;
         if (receita12 > 0) {
-          aliquotaEfetiva = ((receita12 * aliquotaNominal) - parcelaADeduzir) / receita12
+          aliquotaEfetiva = ((receita12 * aliquotaNominal) - parcelaADeduzir) / receita12;
         } else {
-          aliquotaEfetiva = aliquotaNominal
+          aliquotaEfetiva = aliquotaNominal;
         }
 
-        // Garantir que a alíquota efetiva não seja negativa
-        aliquotaEfetiva = Math.max(0, aliquotaEfetiva)
+        aliquotaEfetiva = Math.max(0, aliquotaEfetiva);
 
-        const impostoDevido = faturamento * aliquotaEfetiva
+        const impostoDevido = faturamento * aliquotaEfetiva;
 
         return {
           anexo: nomeAnexo,
@@ -117,89 +121,71 @@ function App() {
           parcelaADeduzir,
           aliquotaEfetiva,
           impostoDevido
-        }
+        };
       }
     }
 
     return {
       anexo: nomeAnexo,
       erro: 'RBT12 excede todas as faixas deste anexo'
-    }
-  }
+    };
+  };
 
   const calcularSimples = () => {
-    setErro('')
-    setResultados(null)
+    setErro('');
+    setResultados(null);
 
-    // Validação de entrada
-    const faturamento = parseFloat(faturamentoMes.replace(',', '.'))
-    const receita12 = parseFloat(rbt12.replace(',', '.'))
+    const faturamento = parseFloat(faturamentoMes.replace(',', '.'));
+    const receita12 = parseFloat(rbt12.replace(',', '.'));
 
     if (isNaN(faturamento) || isNaN(receita12) || faturamento < 0 || receita12 < 0) {
-      setErro('Por favor, digite valores numéricos válidos e positivos para faturamento e RBT12.')
-      return
+      setErro('Por favor, digite valores numéricos válidos e positivos para faturamento e RBT12.');
+      return;
     }
 
     if (receita12 > 4800000.00) {
-      setErro('RBT12 excede o limite do Simples Nacional (R$ 4.800.000,00). A empresa deve migrar para outro regime tributário.')
-      return
+      setErro('RBT12 excede o limite do Simples Nacional (R$ 4.800.000,00). A empresa deve migrar para outro regime tributário.');
+      return;
     }
 
-    // Validação do Fator R se aplicável
-    let fatorR = null
-    let folha12 = 0
+    let fatorR: number | null = null;
+    let folha12 = 0;
     if (aplicarFatorR) {
-      folha12 = parseFloat(folhaPagamento12.replace(',', '.'))
+      folha12 = parseFloat(folhaPagamento12.replace(',', '.'));
       if (isNaN(folha12) || folha12 < 0) {
-        setErro('Por favor, digite um valor válido e positivo para a folha de pagamento.')
-        return
+        setErro('Por favor, digite um valor válido e positivo para a folha de pagamento.');
+        return;
       }
-      fatorR = calcularFatorR(folha12, receita12)
+      fatorR = calcularFatorR(folha12, receita12);
     }
 
-    // Calcular para todos os anexos
-    const resultadosCalculados = []
+    const resultadosCalculados: any[] = [];
 
     Object.entries(anexos).forEach(([nomeAnexo, tabelaAnexo]) => {
-      // Para Anexo III e V, aplicar lógica do Fator R se habilitado
       if (aplicarFatorR && (nomeAnexo.includes('Anexo III') || nomeAnexo.includes('Anexo V'))) {
+        if (fatorR === null) return;
         if (nomeAnexo.includes('Anexo III') && fatorR >= 0.28) {
-          // Pode usar Anexo III
-          const resultado = calcularAnexo(nomeAnexo + ' (Fator R ≥ 28%)', tabelaAnexo, faturamento, receita12)
-          resultado.fatorRApplicado = true
-          resultado.fatorRValor = fatorR
-          resultado.recomendado = true
-          resultadosCalculados.push(resultado)
+          const resultado = calcularAnexo(nomeAnexo + ' (Fator R ≥ 28%)', tabelaAnexo, faturamento, receita12);
+          resultadosCalculados.push({ ...resultado, fatorRApplicado: true, fatorRValor: fatorR, recomendado: true });
         } else if (nomeAnexo.includes('Anexo V') && fatorR < 0.28) {
-          // Deve usar Anexo V
-          const resultado = calcularAnexo(nomeAnexo + ' (Fator R < 28%)', tabelaAnexo, faturamento, receita12)
-          resultado.fatorRApplicado = true
-          resultado.fatorRValor = fatorR
-          resultado.recomendado = true
-          resultadosCalculados.push(resultado)
+          const resultado = calcularAnexo(nomeAnexo + ' (Fator R < 28%)', tabelaAnexo, faturamento, receita12);
+          resultadosCalculados.push({ ...resultado, fatorRApplicado: true, fatorRValor: fatorR, recomendado: true });
         } else if (nomeAnexo.includes('Anexo III') && fatorR < 0.28) {
-          // Não pode usar Anexo III
           resultadosCalculados.push({
             anexo: nomeAnexo + ' (Fator R < 28%)',
             erro: 'Não pode usar este anexo devido ao Fator R ser menor que 28%',
             fatorRApplicado: true,
             fatorRValor: fatorR
-          })
+          });
         } else if (nomeAnexo.includes('Anexo V') && fatorR >= 0.28) {
-          // Pode usar Anexo V, mas Anexo III seria melhor
-          const resultado = calcularAnexo(nomeAnexo + ' (Fator R ≥ 28%)', tabelaAnexo, faturamento, receita12)
-          resultado.fatorRApplicado = true
-          resultado.fatorRValor = fatorR
-          resultado.recomendado = false
-          resultado.observacao = 'Anexo III seria mais vantajoso'
-          resultadosCalculados.push(resultado)
+          const resultado = calcularAnexo(nomeAnexo + ' (Fator R ≥ 28%)', tabelaAnexo, faturamento, receita12);
+          resultadosCalculados.push({ ...resultado, fatorRApplicado: true, fatorRValor: fatorR, recomendado: false, observacao: 'Anexo III seria mais vantajoso' });
         }
       } else {
-        // Cálculo normal para outros anexos
-        const resultado = calcularAnexo(nomeAnexo, tabelaAnexo, faturamento, receita12)
-        resultadosCalculados.push(resultado)
+        const resultado = calcularAnexo(nomeAnexo, tabelaAnexo, faturamento, receita12);
+        resultadosCalculados.push(resultado);
       }
-    })
+    });
 
     setResultados({
       faturamento,
@@ -208,13 +194,12 @@ function App() {
       fatorR,
       aplicarFatorR,
       calculos: resultadosCalculados
-    })
-  }
+    });
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
             <Calculator className="h-10 w-10 text-blue-600" />
@@ -228,7 +213,6 @@ function App() {
           </p>
         </div>
 
-        {/* Formulário de entrada */}
         <Card className="mb-8">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -265,13 +249,12 @@ function App() {
               </div>
             </div>
 
-            {/* Seção do Fator R */}
             <div className="border-t pt-6">
               <div className="flex items-center space-x-2 mb-4">
                 <Checkbox 
                   id="fator-r" 
                   checked={aplicarFatorR}
-                  onCheckedChange={setAplicarFatorR}
+                  onCheckedChange={(checked) => setAplicarFatorR(!!checked)}
                 />
                 <Label htmlFor="fator-r" className="flex items-center gap-2 text-base font-medium">
                   <TrendingUp className="h-4 w-4" />
@@ -330,10 +313,8 @@ function App() {
           </CardContent>
         </Card>
 
-        {/* Resultados */}
         {resultados && (
           <div className="space-y-6">
-            {/* Resumo */}
             <Card>
               <CardHeader>
                 <CardTitle>Resumo dos Dados</CardTitle>
@@ -352,7 +333,7 @@ function App() {
                       {formatarValor(resultados.receita12)}
                     </p>
                   </div>
-                  {resultados.aplicarFatorR && (
+                  {resultados.aplicarFatorR && resultados.fatorR !== null &&(
                     <div>
                       <p className="text-sm text-gray-600">Fator R Calculado</p>
                       <p className="text-2xl font-bold text-purple-600">
@@ -367,9 +348,8 @@ function App() {
               </CardContent>
             </Card>
 
-            {/* Resultados por anexo */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {resultados.calculos.map((calculo, index) => (
+              {resultados.calculos.map((calculo: any, index: number) => (
                 <Card key={index} className={`h-fit ${calculo.recomendado ? 'ring-2 ring-green-500 bg-green-50' : ''}`}>
                   <CardHeader>
                     <CardTitle className="text-lg flex items-center justify-between">
@@ -419,7 +399,6 @@ function App() {
                           </p>
                         </div>
 
-                        {/* Fator R Info */}
                         {calculo.fatorRApplicado && (
                           <Alert>
                             <TrendingUp className="h-4 w-4" />
@@ -434,7 +413,6 @@ function App() {
                           </Alert>
                         )}
 
-                        {/* Observações especiais */}
                         {calculo.anexo.includes('Anexo IV') && (
                           <Alert>
                             <Info className="h-4 w-4" />
@@ -460,7 +438,6 @@ function App() {
               ))}
             </div>
 
-            {/* Avisos importantes */}
             <Alert>
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>
@@ -474,7 +451,7 @@ function App() {
         )}
       </div>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
