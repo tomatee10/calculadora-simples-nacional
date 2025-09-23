@@ -1,21 +1,20 @@
 import { useState } from 'react';
+// Correção: Importar 'checkbox' sem a extensão do arquivo
+import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Calculator, DollarSign, AlertTriangle, Info, Users, TrendingUp } from 'lucide-react';
 import './App.css';
 
-// Definindo um tipo para as faixas dos anexos para melhor manutenibilidade
 type FaixaAnexo = {
   limite: number;
   aliquota: number;
   deduzir: number;
 };
 
-// Tabelas do Simples Nacional 2024/2025
 const anexos: Record<string, FaixaAnexo[]> = {
   "Anexo I (Comércio)": [
     { limite: 180000.00, aliquota: 0.040, deduzir: 0.00 },
@@ -64,7 +63,7 @@ function App() {
   const [rbt12, setRbt12] = useState('');
   const [folhaPagamento12, setFolhaPagamento12] = useState('');
   const [aplicarFatorR, setAplicarFatorR] = useState(false);
-  const [resultados, setResultados] = useState<any>(null); // Você pode criar um tipo mais específico para os resultados
+  const [resultados, setResultados] = useState<any>(null);
   const [erro, setErro] = useState('');
 
   const formatarValor = (valor: number): string => {
@@ -254,7 +253,8 @@ function App() {
                 <Checkbox 
                   id="fator-r" 
                   checked={aplicarFatorR}
-                  onCheckedChange={(checked) => setAplicarFatorR(!!checked)}
+                  // Correção: Tipando o parâmetro 'checked'
+                  onCheckedChange={(checked: boolean | 'indeterminate') => setAplicarFatorR(!!checked)}
                 />
                 <Label htmlFor="fator-r" className="flex items-center gap-2 text-base font-medium">
                   <TrendingUp className="h-4 w-4" />
